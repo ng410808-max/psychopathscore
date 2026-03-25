@@ -354,6 +354,8 @@ function selectAnswer(val,btn){
   nb.disabled=false;
   nb.textContent=isLast?'결과 보기 →':'다음 →';
   nb.className='btn '+(isLast?'btn-submit':'btn-next');
+  // 마지막 문항은 버튼 클릭으로 결과 확인, 나머지는 자동 이동
+  if(!isLast) setTimeout(()=>nextQ(), 350);
 }
 
 function nextQ(){
