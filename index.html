@@ -340,9 +340,12 @@ const LABELS=[{val:1,label:"전혀 그렇지 않다"},{val:2,label:"그렇지 �
 
 let answers=new Array(26).fill(null),responseTimes=[],currentIdx=0,qStartTime=0,redirectTimer=null,redirectCancelled=false,qTimer=null;
 
+
+
 function startQuiz(){
   document.getElementById('notice-area').style.display='none';
   document.getElementById('quiz-section').style.display='block';
+  render();
   document.getElementById('quiz-section').scrollIntoView({behavior:'smooth',block:'start'});
 }
 
@@ -374,7 +377,7 @@ function render(){
     opts.appendChild(btn);
   });
   qStartTime=Date.now();
-  startQTimer();
+  if(document.getElementById('quiz-section').style.display!=='none') startQTimer();
 }
 
 function selectAnswer(val,btn){
@@ -639,7 +642,6 @@ function restart(){
   render();window.scrollTo({top:0,behavior:'smooth'});
 }
 
-render();
-</script>
+
 </body>
 </html>
