@@ -60,6 +60,17 @@
     .option-btn.selected::before{background:var(--safe)}
     .option-score-label{font-family:var(--font-m);font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px}
 
+
+    /* TIMER */
+    .q-timer{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+    .q-timer-num{font-family:var(--font-m);font-size:24px;font-weight:700;color:var(--safe);min-width:32px;transition:color .3s}
+    .q-timer-num.warn{color:var(--yellow)}
+    .q-timer-num.danger{color:var(--accent2)}
+    .q-timer-track{flex:1;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden}
+    .q-timer-fill{height:100%;background:var(--safe);border-radius:3px;transition:width 1s linear,background .3s}
+    .q-timer-fill.warn{background:var(--yellow)}
+    .q-timer-fill.danger{background:var(--accent2)}
+
     /* NAV */
     .nav-row{display:flex;gap:12px;justify-content:flex-end;margin-top:4px}
     .btn{font-family:var(--font-m);font-size:12px;letter-spacing:1px;padding:10px 24px;border-radius:6px;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase}
@@ -142,6 +153,15 @@
     .btn-restart{display:block;width:100%;text-align:center;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--font-m);font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
     .btn-restart:hover{border-color:var(--text-muted);color:var(--text)}
 
+
+    /* START BUTTON */
+    .start-wrap{text-align:center;margin-top:8px;margin-bottom:8px;padding:24px 0 8px}
+    .btn-start{display:inline-block;font-family:var(--font-m);font-size:13px;letter-spacing:2px;text-transform:uppercase;padding:16px 40px;border-radius:8px;border:none;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:700;transition:all .25s;box-shadow:0 4px 20px rgba(231,76,60,.35)}
+    .btn-start:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(231,76,60,.5)}
+    .btn-start:active{transform:translateY(0)}
+    .start-hint{font-family:var(--font-m);font-size:11px;color:var(--text-muted);margin-top:14px;line-height:1.7}
+    .start-hint strong{color:var(--yellow)}
+
     /* FOOTER */
     .site-footer{text-align:center;font-family:var(--font-m);font-size:11px;color:var(--text-muted);margin-top:60px;padding-top:24px;border-top:1px solid var(--border);line-height:1.8}
   </style>
@@ -172,10 +192,14 @@
       <em>Journal of Personality and Social Psychology, 68</em>(1), 151–158.<br />
       PCL-R(헤어 사이코패스 체크리스트) 기반 일반인 자기보고 척도 LSRP — 신뢰도 α = 0.82~0.85
     </div>
+    <div class="start-wrap">
+      <button class="btn-start" onclick="startQuiz()">🧠 문제 풀기 시작</button>
+      <p class="start-hint">위 내용을 읽으셨다면 버튼을 눌러 테스트를 시작하세요.<br/>각 문항은 <strong>10초</strong> 안에 답해야 합니다.</p>
+    </div>
   </div>
 
   <!-- QUIZ -->
-  <div id="quiz-section">
+  <div id="quiz-section" style="display:none;">
     <div class="progress-wrap">
       <div class="progress-info">
         <span id="progress-label">문항 1 / 26</span>
@@ -314,7 +338,13 @@ const QUESTIONS=[
 
 const LABELS=[{val:1,label:"전혀 그렇지 않다"},{val:2,label:"그렇지 않다"},{val:3,label:"그런 편이다"},{val:4,label:"매우 그렇다"}];
 
-let answers=new Array(26).fill(null),responseTimes=[],currentIdx=0,qStartTime=0,redirectTimer=null,redirectCancelled=false;
+let answers=new Array(26).fill(null),responseTimes=[],currentIdx=0,qStartTime=0,redirectTimer=null,redirectCancelled=false,qTimer=null;
+
+function startQuiz(){
+  document.getElementById('notice-area').style.display='none';
+  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('quiz-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
 
 function render(){
   const q=QUESTIONS[currentIdx];
@@ -333,7 +363,7 @@ function render(){
   const card=document.createElement('div');
   card.className='q-card';
   const tl=q.type==='P'?'1형 사이코패스 (냉담형) 척도':'2형 사이코패스 (충동형) 척도';
-  card.innerHTML=`<div class="q-number">문항 ${currentIdx+1} / 26 · ${tl}</div><div class="q-text">${q.text}</div><div class="options-grid" id="opts"></div>`;
+  card.innerHTML=`<div class="q-number">문항 ${currentIdx+1} / 26 · ${tl}</div><div class="q-timer"><span class="q-timer-num" id="timer-num">10</span><div class="q-timer-track"><div class="q-timer-fill" id="timer-fill" style="width:100%"></div></div></div><div class="q-text">${q.text}</div><div class="options-grid" id="opts"></div>`;
   c.appendChild(card);
   const opts=document.getElementById('opts');
   LABELS.forEach(l=>{
@@ -344,9 +374,11 @@ function render(){
     opts.appendChild(btn);
   });
   qStartTime=Date.now();
+  startQTimer();
 }
 
 function selectAnswer(val,btn){
+  clearInterval(qTimer);
   responseTimes[currentIdx]=(Date.now()-qStartTime)/1000;
   answers[currentIdx]=val;
   document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
@@ -373,6 +405,45 @@ function prevQ(){
     document.getElementById('notice-area').style.display = currentIdx===0 ? 'block' : 'none';
     document.getElementById('q-container').scrollIntoView({behavior:'smooth',block:'start'});
   }
+}
+
+function startQTimer(){
+  clearInterval(qTimer);
+  let rem=10;
+  const numEl=document.getElementById('timer-num');
+  const fillEl=document.getElementById('timer-fill');
+  if(!numEl||!fillEl)return;
+  fillEl.style.transition='none';
+  fillEl.style.width='100%';
+  setTimeout(()=>{
+    fillEl.style.transition='width 1s linear,background .3s';
+    fillEl.style.width=((rem-1)/10*100)+'%';
+  },50);
+  qTimer=setInterval(()=>{
+    rem--;
+    const ne=document.getElementById('timer-num');
+    const fe=document.getElementById('timer-fill');
+    if(!ne||!fe){clearInterval(qTimer);return;}
+    ne.textContent=rem;
+    fe.style.width=Math.max(rem-1,0)/10*100+'%';
+    const cls=rem<=3?'danger':rem<=6?'warn':'';
+    ne.className='q-timer-num'+(cls?' '+cls:'');
+    fe.className='q-timer-fill'+(cls?' '+cls:'');
+    if(rem<=0){
+      clearInterval(qTimer);
+      const q=QUESTIONS[currentIdx];
+      const worstVal=q.rev?1:4;
+      responseTimes[currentIdx]=10;
+      answers[currentIdx]=worstVal;
+      const isLast=currentIdx===25;
+      if(isLast){
+        const nb=document.getElementById('btn-next');
+        nb.disabled=false;nb.textContent='결과 보기 →';nb.className='btn btn-submit';
+      }else{
+        nextQ();
+      }
+    }
+  },1000);
 }
 
 function computeScore(){
@@ -560,9 +631,11 @@ function cancelRedirect(){
 
 function restart(){
   clearInterval(redirectTimer);
+  clearInterval(qTimer);
   answers=new Array(26).fill(null);responseTimes=[];currentIdx=0;
   document.getElementById('result-section').style.display='none';
-  document.getElementById('quiz-section').style.display='block';
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('notice-area').style.display='block';
   render();window.scrollTo({top:0,behavior:'smooth'});
 }
 
