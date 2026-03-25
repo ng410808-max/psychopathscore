@@ -155,21 +155,23 @@
     <p class="site-subtitle">LSRP 기반 · 26문항 · 약 5~10분 소요</p>
   </header>
 
-  <div class="disclaimer">
-    <div class="disclaimer-title">📋 반드시 읽어주세요</div>
-    <p>
-      본 테스트는 <strong>오락·교육 목적의 자가 점검 도구</strong>이며, 임상적 진단이나 의학적 판단의 근거로 사용될 수 없습니다.
-      결과 수치는 참고용이며, <strong>높은 점수가 범죄 성향이나 정신 질환을 의미하지 않습니다.</strong>
-      전문적인 심리 평가가 필요하시면 <strong>정신건강의학과 전문의</strong>와 상담하시기 바랍니다.<br /><br />
-      응답은 서버에 저장되지 않으며, 브라우저 내에서만 처리됩니다.
-    </p>
-  </div>
 
-  <div class="source-card">
-    <strong>출처 및 근거</strong><br />
-    Levenson, M.R., Kiehl, K.A., &amp; Fitzpatrick, C.M. (1995). Assessing psychopathic attributes in a noninstitutionalized population.
-    <em>Journal of Personality and Social Psychology, 68</em>(1), 151–158.<br />
-    PCL-R(헤어 사이코패스 체크리스트) 기반 일반인 자기보고 척도 LSRP — 신뢰도 α = 0.82~0.85
+  <div id="notice-area">
+    <div class="disclaimer">
+      <div class="disclaimer-title">📋 반드시 읽어주세요</div>
+      <p>
+        본 테스트는 <strong>오락·교육 목적의 자가 점검 도구</strong>이며, 임상적 진단이나 의학적 판단의 근거로 사용될 수 없습니다.
+        결과 수치는 참고용이며, <strong>높은 점수가 범죄 성향이나 정신 질환을 의미하지 않습니다.</strong>
+        전문적인 심리 평가가 필요하시면 <strong>정신건강의학과 전문의</strong>와 상담하시기 바랍니다.<br /><br />
+        응답은 서버에 저장되지 않으며, 브라우저 내에서만 처리됩니다.
+      </p>
+    </div>
+    <div class="source-card">
+      <strong>출처 및 근거</strong><br />
+      Levenson, M.R., Kiehl, K.A., &amp; Fitzpatrick, C.M. (1995). Assessing psychopathic attributes in a noninstitutionalized population.
+      <em>Journal of Personality and Social Psychology, 68</em>(1), 151–158.<br />
+      PCL-R(헤어 사이코패스 체크리스트) 기반 일반인 자기보고 척도 LSRP — 신뢰도 α = 0.82~0.85
+    </div>
   </div>
 
   <!-- QUIZ -->
@@ -361,10 +363,16 @@ function selectAnswer(val,btn){
 function nextQ(){
   if(answers[currentIdx]===null)return;
   if(currentIdx===25){showResult();return;}
-  currentIdx++;render();window.scrollTo({top:0,behavior:'smooth'});
+  currentIdx++;render();
+  document.getElementById('notice-area').style.display='none';
+  document.getElementById('q-container').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function prevQ(){
-  if(currentIdx>0){currentIdx--;render();window.scrollTo({top:0,behavior:'smooth'});}
+  if(currentIdx>0){
+    currentIdx--;render();
+    document.getElementById('notice-area').style.display = currentIdx===0 ? 'block' : 'none';
+    document.getElementById('q-container').scrollIntoView({behavior:'smooth',block:'start'});
+  }
 }
 
 function computeScore(){
