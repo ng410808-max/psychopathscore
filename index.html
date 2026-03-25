@@ -3,578 +3,176 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>사이코패스 성향 자가 점수 테스트 (LSRP 기반)</title>
+  <title>사이코패스 점수 테스트 (LSRP 기반)</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0a0c10;
-      --surface: #111318;
-      --surface2: #181c24;
-      --border: #2a2f3d;
-      --accent: #c0392b;
-      --accent2: #e74c3c;
-      --safe: #1abc9c;
-      --safe2: #16a085;
-      --text: #e8eaf0;
-      --text-muted: #6b7280;
-      --text-dim: #9ca3af;
-      --yellow: #f39c12;
-      --cyan: #00b4d8;
-      --font-display: 'Noto Serif KR', serif;
-      --font-mono: 'Space Mono', monospace;
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font-display);
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Scanline overlay */
-    body::before {
-      content: '';
-      position: fixed; inset: 0;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,0,0,0.04) 2px,
-        rgba(0,0,0,0.04) 4px
-      );
-      pointer-events: none;
-      z-index: 1000;
-    }
-
-    /* Vignette */
-    body::after {
-      content: '';
-      position: fixed; inset: 0;
-      background: radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.6) 100%);
-      pointer-events: none;
-      z-index: 999;
-    }
-
-    .wrapper {
-      max-width: 760px;
-      margin: 0 auto;
-      padding: 40px 20px 80px;
-      position: relative;
-      z-index: 1;
-    }
-
-    /* ─────────────────── HEADER ─────────────────── */
-    .site-header {
-      text-align: center;
-      padding: 50px 0 30px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 32px;
-    }
-
-    .badge {
-      display: inline-block;
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent2);
-      border: 1px solid var(--accent2);
-      padding: 4px 12px;
-      margin-bottom: 20px;
-      animation: blink 2s step-end infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-
-    .site-title {
-      font-size: clamp(1.6rem, 5vw, 2.4rem);
-      font-weight: 700;
-      letter-spacing: -1px;
-      line-height: 1.2;
-      color: var(--text);
-    }
-
-    .site-title span {
-      color: var(--accent2);
-    }
-
-    .site-subtitle {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      color: var(--text-muted);
-      margin-top: 10px;
-      letter-spacing: 1px;
-    }
-
-    /* ─────────────────── DISCLAIMER CARD ─────────────────── */
-    .disclaimer {
-      background: linear-gradient(135deg, #1a1008, #0f1a14);
-      border: 1px solid var(--yellow);
-      border-left: 4px solid var(--yellow);
-      border-radius: 6px;
-      padding: 20px 24px;
-      margin-bottom: 32px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .disclaimer::before {
-      content: '⚠';
-      position: absolute;
-      right: 16px;
-      top: 12px;
-      font-size: 28px;
-      opacity: 0.12;
-    }
-
-    .disclaimer-title {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--yellow);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .disclaimer p {
-      font-size: 13px;
-      line-height: 1.7;
-      color: #c5b68a;
-    }
-
-    .disclaimer strong {
-      color: var(--yellow);
-    }
-
-    /* ─────────────────── SOURCE CARD ─────────────────── */
-    .source-card {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 16px 20px;
-      margin-bottom: 36px;
-      font-size: 12px;
-      font-family: var(--font-mono);
-      color: var(--text-muted);
-    }
-
-    .source-card strong { color: var(--cyan); }
-
-    /* ─────────────────── PROGRESS ─────────────────── */
-    .progress-wrap {
-      margin-bottom: 28px;
-    }
-
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .progress-bar-track {
-      height: 3px;
-      background: var(--surface2);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--safe2), var(--safe));
-      border-radius: 2px;
-      transition: width 0.4s ease;
-      width: 0%;
-    }
-
-    /* ─────────────────── QUESTION CARD ─────────────────── */
-    .q-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 32px 28px;
-      margin-bottom: 16px;
-      animation: fadeUp 0.35s ease forwards;
-      opacity: 0;
-      transform: translateY(12px);
-    }
-
-    @keyframes fadeUp {
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .q-number {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    .q-text {
-      font-size: 17px;
-      font-weight: 400;
-      line-height: 1.65;
-      color: var(--text);
-      margin-bottom: 28px;
-    }
-
-    /* ─────────────────── OPTIONS ─────────────────── */
-    .options-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
-    @media (max-width: 500px) {
-      .options-grid { grid-template-columns: 1fr; }
-    }
-
-    .option-btn {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 14px 16px;
-      text-align: left;
-      cursor: pointer;
-      transition: all 0.18s ease;
-      font-family: var(--font-display);
-      font-size: 13.5px;
-      color: var(--text-dim);
-      line-height: 1.4;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .option-btn::before {
-      content: '';
-      position: absolute;
-      left: 0; top: 0; bottom: 0;
-      width: 3px;
-      background: transparent;
-      transition: background 0.18s;
-    }
-
-    .option-btn:hover {
-      border-color: var(--cyan);
-      color: var(--text);
-      background: #141820;
-      transform: translateX(3px);
-    }
-
-    .option-btn:hover::before {
-      background: var(--cyan);
-    }
-
-    .option-btn.selected {
-      border-color: var(--safe);
-      color: var(--text);
-      background: #0d1f1b;
-    }
-
-    .option-btn.selected::before {
-      background: var(--safe);
-    }
-
-    .option-score-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-muted);
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    /* ─────────────────── NAV BUTTONS ─────────────────── */
-    .nav-row {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-end;
-      margin-top: 4px;
-    }
-
-    .btn {
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 1px;
-      padding: 10px 24px;
-      border-radius: 6px;
-      cursor: pointer;
-      border: none;
-      transition: all 0.2s;
-      text-transform: uppercase;
-    }
-
-    .btn-prev {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-    }
-
-    .btn-prev:hover {
-      border-color: var(--text-muted);
-      color: var(--text);
-    }
-
-    .btn-next {
-      background: var(--accent);
-      color: #fff;
-    }
-
-    .btn-next:hover { background: var(--accent2); }
-    .btn-next:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
-
-    .btn-submit {
-      background: var(--safe2);
-      color: #fff;
-    }
-
-    .btn-submit:hover { background: var(--safe); }
-    .btn-submit:disabled { background: var(--border); color: var(--text-muted); cursor: not-allowed; }
-
-    /* ─────────────────── RESULTS ─────────────────── */
-    #result-section {
-      display: none;
-      animation: fadeUp 0.5s ease forwards;
-    }
-
-    .result-header {
-      text-align: center;
-      padding: 40px 0 28px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 32px;
-    }
-
-    .result-icon {
-      font-size: 56px;
-      display: block;
-      margin-bottom: 16px;
-    }
-
-    .result-grade {
-      font-size: clamp(1.8rem, 6vw, 2.8rem);
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .result-grade.low { color: var(--safe); }
-    .result-grade.mid { color: var(--yellow); }
-    .result-grade.high { color: var(--accent2); }
-
-    .result-desc {
-      font-size: 14px;
-      color: var(--text-dim);
-      max-width: 520px;
-      margin: 0 auto;
-      line-height: 1.7;
-    }
-
-    /* Score bars */
-    .score-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 28px 24px;
-      margin-bottom: 20px;
-    }
-
-    .score-section h3 {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-
-    .score-row {
-      margin-bottom: 20px;
-    }
-
-    .score-row:last-child { margin-bottom: 0; }
-
-    .score-label-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8px;
-    }
-
-    .score-name {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text);
-    }
-
-    .score-value {
-      font-family: var(--font-mono);
-      font-size: 13px;
-    }
-
-    .bar-track {
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 1s cubic-bezier(.4,0,.2,1);
-      width: 0%;
-    }
-
-    .bar-fill.primary { background: linear-gradient(90deg, #c0392b, #e74c3c); }
-    .bar-fill.secondary { background: linear-gradient(90deg, #e67e22, #f39c12); }
-    .bar-fill.total { background: linear-gradient(90deg, #8e44ad, #9b59b6); }
-
-    .score-band {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 6px;
-    }
-
-    /* Interpretation cards */
-    .interp-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 20px;
-    }
-
-    @media (max-width: 500px) { .interp-grid { grid-template-columns: 1fr; } }
-
-    .interp-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 18px 16px;
-    }
-
-    .interp-card-title {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .interp-card-title.red { color: var(--accent2); }
-    .interp-card-title.orange { color: var(--yellow); }
-
-    .interp-card p {
-      font-size: 13px;
-      line-height: 1.65;
-      color: var(--text-dim);
-    }
-
-    /* Behavior log */
-    .behavior-log {
-      background: #050710;
-      border: 1px solid #1e2235;
-      border-radius: 6px;
-      padding: 16px 18px;
-      margin-bottom: 20px;
-    }
-
-    .behavior-log-title {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    .behavior-log pre {
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: #4ade80;
-      line-height: 1.7;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .btn-restart {
-      display: block;
-      width: 100%;
-      text-align: center;
-      padding: 14px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-muted);
-      font-family: var(--font-mono);
-      font-size: 12px;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-restart:hover {
-      border-color: var(--text-muted);
-      color: var(--text);
-    }
-
-    /* Footer */
-    .site-footer {
-      text-align: center;
-      font-family: var(--font-mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 60px;
-      padding-top: 24px;
-      border-top: 1px solid var(--border);
-      line-height: 1.8;
-    }
+      --bg:#0a0c10;--surface:#111318;--surface2:#181c24;--border:#2a2f3d;
+      --accent:#c0392b;--accent2:#e74c3c;--safe:#1abc9c;--safe2:#16a085;
+      --text:#e8eaf0;--text-muted:#6b7280;--text-dim:#9ca3af;
+      --yellow:#f39c12;--cyan:#00b4d8;--purple:#9b59b6;
+      --font-d:'Noto Serif KR',serif;--font-m:'Space Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:var(--font-d);min-height:100vh;overflow-x:hidden;position:relative}
+    body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.04) 2px,rgba(0,0,0,.04) 4px);pointer-events:none;z-index:1000}
+    body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at center,transparent 50%,rgba(0,0,0,.6) 100%);pointer-events:none;z-index:999}
+    .wrapper{max-width:760px;margin:0 auto;padding:40px 20px 80px;position:relative;z-index:1}
+
+    /* HEADER */
+    .site-header{text-align:center;padding:50px 0 30px;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .badge{display:inline-block;font-family:var(--font-m);font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);border:1px solid var(--accent2);padding:4px 12px;margin-bottom:20px;animation:blink 2s step-end infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+    .site-title{font-size:clamp(1.6rem,5vw,2.4rem);font-weight:700;letter-spacing:-1px;line-height:1.2}
+    .site-title span{color:var(--accent2)}
+    .site-subtitle{font-family:var(--font-m);font-size:12px;color:var(--text-muted);margin-top:10px;letter-spacing:1px}
+
+    /* DISCLAIMER */
+    .disclaimer{background:linear-gradient(135deg,#1a1008,#0f1a14);border:1px solid var(--yellow);border-left:4px solid var(--yellow);border-radius:6px;padding:20px 24px;margin-bottom:32px;position:relative;overflow:hidden}
+    .disclaimer::before{content:'⚠';position:absolute;right:16px;top:12px;font-size:28px;opacity:.12}
+    .disclaimer-title{font-family:var(--font-m);font-size:11px;letter-spacing:2px;color:var(--yellow);text-transform:uppercase;margin-bottom:10px}
+    .disclaimer p{font-size:13px;line-height:1.7;color:#c5b68a}
+    .disclaimer strong{color:var(--yellow)}
+
+    /* SOURCE */
+    .source-card{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:16px 20px;margin-bottom:36px;font-size:12px;font-family:var(--font-m);color:var(--text-muted)}
+    .source-card strong{color:var(--cyan)}
+
+    /* PROGRESS */
+    .progress-wrap{margin-bottom:28px}
+    .progress-info{display:flex;justify-content:space-between;font-family:var(--font-m);font-size:11px;color:var(--text-muted);margin-bottom:6px}
+    .progress-bar-track{height:3px;background:var(--surface2);border-radius:2px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--safe2),var(--safe));border-radius:2px;transition:width .4s ease;width:0%}
+
+    /* QUESTION */
+    .q-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:32px 28px;margin-bottom:16px;animation:fadeUp .35s ease forwards;opacity:0;transform:translateY(12px)}
+    @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+    .q-number{font-family:var(--font-m);font-size:11px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:14px}
+    .q-text{font-size:17px;line-height:1.65;color:var(--text);margin-bottom:28px}
+    .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:500px){.options-grid{grid-template-columns:1fr}}
+    .option-btn{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;text-align:left;cursor:pointer;transition:all .18s;font-family:var(--font-d);font-size:13.5px;color:var(--text-dim);line-height:1.4;position:relative;overflow:hidden}
+    .option-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .18s}
+    .option-btn:hover{border-color:var(--cyan);color:var(--text);background:#141820;transform:translateX(3px)}
+    .option-btn:hover::before{background:var(--cyan)}
+    .option-btn.selected{border-color:var(--safe);color:var(--text);background:#0d1f1b}
+    .option-btn.selected::before{background:var(--safe)}
+    .option-score-label{font-family:var(--font-m);font-size:10px;color:var(--text-muted);display:block;margin-bottom:4px}
+
+    /* NAV */
+    .nav-row{display:flex;gap:12px;justify-content:flex-end;margin-top:4px}
+    .btn{font-family:var(--font-m);font-size:12px;letter-spacing:1px;padding:10px 24px;border-radius:6px;cursor:pointer;border:none;transition:all .2s;text-transform:uppercase}
+    .btn-prev{background:transparent;border:1px solid var(--border);color:var(--text-muted)}
+    .btn-prev:hover{border-color:var(--text-muted);color:var(--text)}
+    .btn-next{background:var(--accent);color:#fff}
+    .btn-next:hover{background:var(--accent2)}
+    .btn-next:disabled,.btn-submit:disabled{background:var(--border);color:var(--text-muted);cursor:not-allowed}
+    .btn-submit{background:var(--safe2);color:#fff}
+    .btn-submit:hover{background:var(--safe)}
+
+    /* RESULTS */
+    #result-section{display:none;animation:fadeUp .5s ease forwards}
+    .result-header{text-align:center;padding:40px 0 28px;border-bottom:1px solid var(--border);margin-bottom:32px}
+    .result-icon{font-size:56px;display:block;margin-bottom:16px}
+    .result-grade{font-size:clamp(1.8rem,6vw,2.8rem);font-weight:700;margin-bottom:12px}
+    .result-grade.low{color:var(--safe)}
+    .result-grade.mid{color:var(--yellow)}
+    .result-grade.high{color:var(--accent2)}
+    .result-desc{font-size:15px;color:var(--text-dim);max-width:560px;margin:0 auto;line-height:1.9}
+    .result-desc strong{color:var(--text)}
+
+    /* SCORE SECTION */
+    .score-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px 24px;margin-bottom:20px}
+    .section-title{font-family:var(--font-m);font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px}
+    .score-row{margin-bottom:24px}
+    .score-row:last-child{margin-bottom:0}
+    .score-label-row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+    .score-name{font-size:14px;font-weight:600;color:var(--text)}
+    .score-value{font-family:var(--font-m);font-size:13px}
+    .bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.4,0,.2,1);width:0%}
+    .bar-fill.primary{background:linear-gradient(90deg,#c0392b,#e74c3c)}
+    .bar-fill.secondary{background:linear-gradient(90deg,#e67e22,#f39c12)}
+    .bar-fill.total{background:linear-gradient(90deg,#8e44ad,#9b59b6)}
+    .score-band{font-family:var(--font-m);font-size:10px;color:var(--text-muted);margin-top:6px}
+
+    /* DETAIL */
+    .detail-section{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:28px 24px;margin-bottom:20px}
+    .detail-block{margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+    .detail-block:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+    .detail-block-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .detail-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px}
+    .dot-red{background:var(--accent2)}
+    .dot-orange{background:var(--yellow)}
+    .dot-purple{background:var(--purple)}
+    .detail-block-title{font-size:15px;font-weight:600;color:var(--text)}
+    .detail-block-subtitle{font-family:var(--font-m);font-size:10px;color:var(--text-muted);margin-top:3px}
+    .detail-block-body{font-size:13.5px;line-height:1.8;color:var(--text-dim);padding-left:22px}
+    .detail-block-body strong{color:var(--text)}
+
+    /* TYPE CARDS */
+    .interp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    @media(max-width:500px){.interp-grid{grid-template-columns:1fr}}
+    .interp-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:18px 16px}
+    .interp-card-title{font-family:var(--font-m);font-size:10px;letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+    .interp-card-title.red{color:var(--accent2)}
+    .interp-card-title.orange{color:var(--yellow)}
+    .interp-card p{font-size:13px;line-height:1.7;color:var(--text-dim)}
+
+    /* LOG */
+    .behavior-log{background:#050710;border:1px solid #1e2235;border-radius:6px;padding:16px 18px;margin-bottom:20px}
+    .behavior-log-title{font-family:var(--font-m);font-size:10px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;margin-bottom:10px}
+    .behavior-log pre{font-family:var(--font-m);font-size:11px;color:#4ade80;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+
+    /* REDIRECT */
+    .redirect-box{background:linear-gradient(135deg,#0d1520,#0a1218);border:1px solid var(--cyan);border-radius:10px;padding:28px 24px;margin-bottom:20px;text-align:center}
+    .redirect-box-title{font-family:var(--font-m);font-size:11px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:14px}
+    .redirect-countdown{font-size:clamp(2.5rem,8vw,4rem);font-weight:700;font-family:var(--font-m);color:var(--cyan);margin-bottom:10px;line-height:1}
+    .redirect-msg{font-size:14px;color:var(--text-dim);line-height:1.8;margin-bottom:16px}
+    .redirect-msg strong{color:var(--text)}
+    .redirect-progress-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;margin-bottom:16px}
+    .redirect-progress-fill{height:100%;background:var(--cyan);border-radius:2px;width:100%;transition:width 1s linear}
+    .btn-go{display:inline-block;font-family:var(--font-m);font-size:11px;letter-spacing:1px;padding:8px 20px;border-radius:5px;background:var(--cyan);color:#000;cursor:pointer;border:none;text-transform:uppercase;font-weight:700;transition:opacity .2s}
+    .btn-go:hover{opacity:.85}
+    .btn-cancel{display:inline-block;font-family:var(--font-m);font-size:11px;letter-spacing:1px;padding:8px 20px;border-radius:5px;background:transparent;color:var(--text-muted);cursor:pointer;border:1px solid var(--border);text-transform:uppercase;margin-left:10px;transition:all .2s}
+    .btn-cancel:hover{border-color:var(--text-muted);color:var(--text)}
+
+    /* RESTART */
+    .btn-restart{display:block;width:100%;text-align:center;padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text-muted);font-family:var(--font-m);font-size:12px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+    .btn-restart:hover{border-color:var(--text-muted);color:var(--text)}
+
+    /* FOOTER */
+    .site-footer{text-align:center;font-family:var(--font-m);font-size:11px;color:var(--text-muted);margin-top:60px;padding-top:24px;border-top:1px solid var(--border);line-height:1.8}
   </style>
 </head>
 <body>
-
 <div class="wrapper">
 
-  <!-- HEADER -->
   <header class="site-header">
     <div class="badge">★ 재미로 보는 자가 테스트 ★</div>
-    <h1 class="site-title">사이코패스 성향<br><span>자가 점수 테스트</span></h1>
+    <h1 class="site-title">사이코패스 점수<br><span>자가 테스트</span></h1>
     <p class="site-subtitle">LSRP 기반 · 26문항 · 약 5~10분 소요</p>
   </header>
 
-  <!-- DISCLAIMER -->
   <div class="disclaimer">
     <div class="disclaimer-title">📋 반드시 읽어주세요</div>
     <p>
       본 테스트는 <strong>오락·교육 목적의 자가 점검 도구</strong>이며, 임상적 진단이나 의학적 판단의 근거로 사용될 수 없습니다.
-      결과 수치는 참고용이며, 높은 점수가 범죄 성향이나 정신 질환을 의미하지 않습니다.
-      전문적인 심리 평가가 필요하시면 <strong>정신건강의학과 전문의</strong>와 상담하시기 바랍니다.
-      <br /><br />
+      결과 수치는 참고용이며, <strong>높은 점수가 범죄 성향이나 정신 질환을 의미하지 않습니다.</strong>
+      전문적인 심리 평가가 필요하시면 <strong>정신건강의학과 전문의</strong>와 상담하시기 바랍니다.<br /><br />
       응답은 서버에 저장되지 않으며, 브라우저 내에서만 처리됩니다.
     </p>
   </div>
 
-  <!-- SOURCE CARD -->
   <div class="source-card">
     <strong>출처 및 근거</strong><br />
-    Levenson, M.R., Kiehl, K.A., & Fitzpatrick, C.M. (1995). Assessing psychopathic attributes in a noninstitutionalized population.
+    Levenson, M.R., Kiehl, K.A., &amp; Fitzpatrick, C.M. (1995). Assessing psychopathic attributes in a noninstitutionalized population.
     <em>Journal of Personality and Social Psychology, 68</em>(1), 151–158.<br />
-    PCL-R 기반 일반인 대상 자기보고식 척도 LSRP — 신뢰도 α = 0.82~0.85 (Primary), 0.63~0.68 (Secondary)
+    PCL-R(헤어 사이코패스 체크리스트) 기반 일반인 자기보고 척도 LSRP — 신뢰도 α = 0.82~0.85
   </div>
 
-  <!-- QUIZ SECTION -->
+  <!-- QUIZ -->
   <div id="quiz-section">
     <div class="progress-wrap">
       <div class="progress-info">
@@ -585,379 +183,380 @@
         <div class="progress-bar-fill" id="progress-fill"></div>
       </div>
     </div>
-
     <div id="q-container"></div>
-
     <div class="nav-row">
       <button class="btn btn-prev" id="btn-prev" onclick="prevQ()" style="display:none;">← 이전</button>
       <button class="btn btn-next" id="btn-next" onclick="nextQ()" disabled>다음 →</button>
     </div>
   </div>
 
-  <!-- RESULT SECTION -->
+  <!-- RESULT -->
   <div id="result-section">
+
     <div class="result-header">
       <span class="result-icon" id="result-icon">🔬</span>
-      <div class="result-grade" id="result-grade">분석 중...</div>
+      <div class="result-grade" id="result-grade"></div>
       <p class="result-desc" id="result-desc"></p>
     </div>
 
     <div class="score-section">
-      <h3>점수 분석</h3>
+      <div class="section-title">📊 점수 측정 결과</div>
       <div class="score-row">
         <div class="score-label-row">
-          <span class="score-name">1차 사이코패시 (Primary)</span>
+          <span class="score-name">🔴 1형 사이코패스 — 냉담형</span>
           <span class="score-value" id="p-score-val" style="color:var(--accent2)">—</span>
         </div>
         <div class="bar-track"><div class="bar-fill primary" id="p-bar"></div></div>
-        <div class="score-band" id="p-band">조작 성향 / 감정 결여 / 공감 부재</div>
+        <div class="score-band" id="p-band"></div>
       </div>
       <div class="score-row">
         <div class="score-label-row">
-          <span class="score-name">2차 사이코패시 (Secondary)</span>
+          <span class="score-name">🟠 2형 사이코패스 — 충동형</span>
           <span class="score-value" id="s-score-val" style="color:var(--yellow)">—</span>
         </div>
         <div class="bar-track"><div class="bar-fill secondary" id="s-bar"></div></div>
-        <div class="score-band" id="s-band">충동성 / 반사회적 행동 / 자기통제 결여</div>
+        <div class="score-band" id="s-band"></div>
       </div>
       <div class="score-row">
         <div class="score-label-row">
-          <span class="score-name">종합 점수</span>
-          <span class="score-value" id="t-score-val" style="color:#9b59b6">—</span>
+          <span class="score-name">🟣 종합 점수</span>
+          <span class="score-value" id="t-score-val" style="color:var(--purple)">—</span>
         </div>
         <div class="bar-track"><div class="bar-fill total" id="t-bar"></div></div>
-        <div class="score-band">총점 범위 26–104 / 일반 대학생 평균: 약 55.7점 (Levenson et al., 1995)</div>
+        <div class="score-band">점수 범위 26~104점 / 일반 성인 평균 약 55.7점 (Levenson et al., 1995)</div>
       </div>
+    </div>
+
+    <div class="detail-section">
+      <div class="section-title">📝 내 결과 상세 해설</div>
+      <div id="detail-content"></div>
     </div>
 
     <div class="interp-grid">
       <div class="interp-card">
-        <div class="interp-card-title red">1차 사이코패시란?</div>
-        <p>타인에 대한 공감 결여, 조종적 대인관계, 죄책감 부재가 특징입니다. Hare PCL-R의 대인관계·정서 요인에 대응합니다.</p>
+        <div class="interp-card-title red">🔴 1형 사이코패스란?</div>
+        <p>
+          <strong>냉담형</strong>이라고도 합니다. 겉으로는 매력적이고 카리스마 있어 보이지만, 타인의 고통에 공감하지 못하고 자신의 이익을 위해 상대를 도구처럼 다루는 경향이 있습니다. 죄책감이나 후회를 거의 느끼지 않는 것이 핵심 특성입니다.<br /><br />
+          <strong>김소영 사건</strong>처럼 계획적인 약물 범죄에서 주로 나타나는 유형이 이 1형에 가깝습니다.
+        </p>
       </div>
       <div class="interp-card">
-        <div class="interp-card-title orange">2차 사이코패시란?</div>
-        <p>충동적 행동, 계획 없는 생활방식, 반복적인 반사회적 행동이 특징입니다. PCL-R의 생활양식·반사회성 요인에 대응합니다.</p>
+        <div class="interp-card-title orange">🟠 2형 사이코패스란?</div>
+        <p>
+          <strong>충동형</strong>이라고도 합니다. 순간의 감정이나 유혹을 참지 못하고 즉흥적으로 행동하며, 결과를 미리 생각하지 않고 같은 실수를 반복하는 것이 특징입니다. 지루함을 잘 참지 못하고 자극을 추구합니다.<br /><br />
+          1형에 비해 감정 기복이 크고, 자기 자신도 충동적 행동으로 인한 피해를 받는 경우가 많습니다.
+        </p>
       </div>
     </div>
 
-    <div class="behavior-log" id="behavior-log">
-      <div class="behavior-log-title">[ 반응 시간 분석 로그 ]</div>
-      <pre id="log-content">로딩 중...</pre>
+    <div class="behavior-log">
+      <div class="behavior-log-title">[ 문항별 응답 시간 분석 ]</div>
+      <pre id="log-content"></pre>
+    </div>
+
+    <!-- 30초 리다이렉션 -->
+    <div class="redirect-box" id="redirect-box">
+      <div class="redirect-box-title">📖 관련 블로그 포스팅으로 이동</div>
+      <div class="redirect-countdown" id="countdown-num">30</div>
+      <div class="redirect-msg">
+        초 후 <strong>사이코패스 분석 블로그</strong>로 자동 이동합니다.<br />
+        약물 범죄 예방, 사이코패스 심층 분석 글을 확인해 보세요.
+      </div>
+      <div class="redirect-progress-track">
+        <div class="redirect-progress-fill" id="redirect-bar"></div>
+      </div>
+      <button class="btn-go" onclick="goNow()">지금 바로 이동 →</button>
+      <button class="btn-cancel" onclick="cancelRedirect()">취소</button>
     </div>
 
     <button class="btn-restart" onclick="restart()">🔄 테스트 다시 하기</button>
   </div>
 
-  <!-- FOOTER -->
   <footer class="site-footer">
-    본 테스트는 오락·교육 목적으로만 제공됩니다.<br />
-    임상 진단 도구가 아닙니다. 전문적 판단을 대체할 수 없습니다.<br />
-    LSRP © Levenson, Kiehl & Fitzpatrick (1995) — 학술 목적 번역 사용
+    본 테스트는 오락·교육 목적으로만 제공됩니다. 임상 진단 도구가 아닙니다.<br />
+    LSRP © Levenson, Kiehl &amp; Fitzpatrick (1995) — 학술 목적 번역 사용
   </footer>
 
 </div>
-
 <script>
-// ── LSRP 26문항 (Levenson et al., 1995) 한국어 번역 ──
-// type: "P" = Primary (1차), "S" = Secondary (2차)
-// reversed: true → 점수 역산 (5 - 응답값)
-const QUESTIONS = [
-  // ──── PRIMARY PSYCHOPATHY (16문항) ────
-  {
-    id: 1, type: "P", reversed: false,
-    text: "성공은 약육강식의 원리에 따른 것이다. 패배자들의 처지는 내가 걱정할 일이 아니다."
-  },
-  {
-    id: 2, type: "P", reversed: false,
-    text: "나에게 있어 '옳은 것'이란 내가 처벌받지 않고 할 수 있는 것이면 무엇이든 괜찮다."
-  },
-  {
-    id: 3, type: "P", reversed: false,
-    text: "요즘 세상에서 성공하려면 처벌받지 않는 한 어떤 수단이든 쓸 수 있다고 생각한다."
-  },
-  {
-    id: 4, type: "P", reversed: false,
-    text: "내 인생의 주된 목적은 가능한 한 많은 것을 얻는 것이다."
-  },
-  {
-    id: 5, type: "P", reversed: false,
-    text: "돈을 많이 버는 것이 나의 가장 중요한 목표이다."
-  },
-  {
-    id: 6, type: "P", reversed: false,
-    text: "높은 도덕적 가치는 다른 사람들이 고민할 일이다. 나는 결과만 중요하게 생각한다."
-  },
-  {
-    id: 7, type: "P", reversed: false,
-    text: "사기를 당할 만큼 어리석은 사람은 그 결과를 감수할 수밖에 없다."
-  },
-  {
-    id: 8, type: "P", reversed: false,
-    text: "나 자신을 챙기는 것이 항상 최우선이다."
-  },
-  {
-    id: 9, type: "P", reversed: false,
-    text: "나는 내가 원하는 것을 얻기 위해 상대방이 듣고 싶어하는 말을 해준다."
-  },
-  {
-    id: 10, type: "P", reversed: true,
-    text: "내 성공이 다른 사람에게 피해를 준다면 마음이 불편할 것이다."
-  },
-  {
-    id: 11, type: "P", reversed: false,
-    text: "정말 영리하게 꾸며진 사기나 속임수를 보면 감탄스럽다."
-  },
-  {
-    id: 12, type: "P", reversed: true,
-    text: "나는 판단을 내리기 전에 항상 상대방의 입장을 이해하려고 노력한다."
-  },
-  {
-    id: 13, type: "P", reversed: false,
-    text: "나는 내 진짜 생각보다 상대방이 듣고 싶어하는 말을 하는 경향이 있다."
-  },
-  {
-    id: 14, type: "P", reversed: false,
-    text: "나는 다른 사람의 감정을 조종하는 것을 즐긴다."
-  },
-  {
-    id: 15, type: "P", reversed: true,
-    text: "내 말이나 행동이 누군가에게 정서적 고통을 준다면 나는 양심의 가책을 느낀다."
-  },
-  {
-    id: 16, type: "P", reversed: true,
-    text: "나는 어떤 것을 팔려고 설득할 때도 거짓말은 하지 않는다."
-  },
+const BLOG_URL='https://redchupa.com/entry/%EC%82%AC%EC%9D%B4%EC%BD%94%ED%8C%A8%EC%8A%A4-%EC%A0%90%EC%88%98-%ED%85%8C%EC%8A%A4%ED%8A%B8%EA%B8%B0';
 
-  // ──── SECONDARY PSYCHOPATHY (10문항) ────
-  {
-    id: 17, type: "S", reversed: false,
-    text: "나는 시작한 일에 금방 흥미를 잃는 편이다."
-  },
-  {
-    id: 18, type: "S", reversed: false,
-    text: "내 문제의 대부분은 주변 사람들이 나를 제대로 이해하지 못하기 때문에 생긴다."
-  },
-  {
-    id: 19, type: "S", reversed: false,
-    text: "나는 다른 사람들과 언성을 높이며 다투는 경우가 많다."
-  },
-  {
-    id: 20, type: "S", reversed: false,
-    text: "유혹을 참기가 매우 어렵다."
-  },
-  {
-    id: 21, type: "S", reversed: false,
-    text: "나는 꽤 거칠고 흥미진진한 시간을 보낸 경험이 있다."
-  },
-  {
-    id: 22, type: "S", reversed: false,
-    text: "나는 앞날에 대해 미리 계획을 세우지 않는 편이다."
-  },
-  {
-    id: 23, type: "S", reversed: false,
-    text: "나는 같은 종류의 곤경에 반복적으로 빠져드는 것 같다."
-  },
-  {
-    id: 24, type: "S", reversed: true,
-    text: "나는 무슨 일을 하기 전에 가능한 결과를 신중하게 고려한다."
-  },
-  {
-    id: 25, type: "S", reversed: false,
-    text: "나는 생각 없이 충동적으로 행동하는 경우가 많다."
-  },
-  {
-    id: 26, type: "S", reversed: false,
-    text: "나는 자주 지루함을 느낀다."
-  }
+const QUESTIONS=[
+  {id:1,type:"P",rev:false,text:"성공은 약육강식의 원리에 따른 것이다. 패배자들의 처지는 내가 걱정할 일이 아니다."},
+  {id:2,type:"P",rev:false,text:"나에게 있어 '옳은 것'이란 내가 처벌받지 않고 할 수 있는 것이면 무엇이든 괜찮다."},
+  {id:3,type:"P",rev:false,text:"요즘 세상에서 성공하려면 처벌받지 않는 한 어떤 수단이든 쓸 수 있다고 생각한다."},
+  {id:4,type:"P",rev:false,text:"내 인생의 주된 목적은 가능한 한 많은 것을 얻는 것이다."},
+  {id:5,type:"P",rev:false,text:"돈을 많이 버는 것이 나의 가장 중요한 목표이다."},
+  {id:6,type:"P",rev:false,text:"높은 도덕적 가치는 다른 사람들이 고민할 일이다. 나는 결과만 중요하게 생각한다."},
+  {id:7,type:"P",rev:false,text:"사기를 당할 만큼 어리석은 사람은 그 결과를 감수할 수밖에 없다."},
+  {id:8,type:"P",rev:false,text:"나 자신을 챙기는 것이 항상 최우선이다."},
+  {id:9,type:"P",rev:false,text:"나는 내가 원하는 것을 얻기 위해 상대방이 듣고 싶어하는 말을 해준다."},
+  {id:10,type:"P",rev:true, text:"내 성공이 다른 사람에게 피해를 준다면 마음이 불편할 것이다."},
+  {id:11,type:"P",rev:false,text:"정말 영리하게 꾸며진 사기나 속임수를 보면 감탄스럽다."},
+  {id:12,type:"P",rev:true, text:"나는 판단을 내리기 전에 항상 상대방의 입장을 이해하려고 노력한다."},
+  {id:13,type:"P",rev:false,text:"나는 내 진짜 생각보다 상대방이 듣고 싶어하는 말을 하는 경향이 있다."},
+  {id:14,type:"P",rev:false,text:"나는 다른 사람의 감정을 조종하는 것을 즐긴다."},
+  {id:15,type:"P",rev:true, text:"내 말이나 행동이 누군가에게 정서적 고통을 준다면 나는 양심의 가책을 느낀다."},
+  {id:16,type:"P",rev:true, text:"나는 어떤 것을 팔거나 설득할 때도 거짓말은 하지 않는다."},
+  {id:17,type:"S",rev:false,text:"나는 시작한 일에 금방 흥미를 잃는 편이다."},
+  {id:18,type:"S",rev:false,text:"내 문제의 대부분은 주변 사람들이 나를 제대로 이해하지 못하기 때문에 생긴다."},
+  {id:19,type:"S",rev:false,text:"나는 다른 사람들과 언성을 높이며 다투는 경우가 많다."},
+  {id:20,type:"S",rev:false,text:"유혹을 참기가 매우 어렵다."},
+  {id:21,type:"S",rev:false,text:"나는 꽤 거칠고 흥미진진한 시간을 보낸 경험이 있다."},
+  {id:22,type:"S",rev:false,text:"나는 앞날에 대해 미리 계획을 세우지 않는 편이다."},
+  {id:23,type:"S",rev:false,text:"나는 같은 종류의 곤경에 반복적으로 빠져드는 것 같다."},
+  {id:24,type:"S",rev:true, text:"나는 무슨 일을 하기 전에 가능한 결과를 신중하게 고려한다."},
+  {id:25,type:"S",rev:false,text:"나는 생각 없이 충동적으로 행동하는 경우가 많다."},
+  {id:26,type:"S",rev:false,text:"나는 자주 지루함을 느낀다."}
 ];
 
-const LABELS = [
-  { val: 1, label: "전혀 그렇지 않다" },
-  { val: 2, label: "그렇지 않다" },
-  { val: 3, label: "그런 편이다" },
-  { val: 4, label: "매우 그렇다" }
-];
+const LABELS=[{val:1,label:"전혀 그렇지 않다"},{val:2,label:"그렇지 않다"},{val:3,label:"그런 편이다"},{val:4,label:"매우 그렇다"}];
 
-let answers = new Array(26).fill(null);
-let responseTimes = [];
-let currentIdx = 0;
-let qStartTime = 0;
+let answers=new Array(26).fill(null),responseTimes=[],currentIdx=0,qStartTime=0,redirectTimer=null,redirectCancelled=false;
 
-function render() {
-  const q = QUESTIONS[currentIdx];
-  const pct = Math.round((currentIdx / 26) * 100);
-
-  document.getElementById('progress-label').textContent = `문항 ${currentIdx + 1} / 26`;
-  document.getElementById('progress-pct').textContent = pct + '%';
-  document.getElementById('progress-fill').style.width = pct + '%';
-
-  document.getElementById('btn-prev').style.display = currentIdx > 0 ? 'inline-block' : 'none';
-
-  const isLast = currentIdx === 25;
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.textContent = isLast ? '결과 보기 →' : '다음 →';
-  nextBtn.className = 'btn ' + (isLast ? 'btn-submit' : 'btn-next');
-  nextBtn.disabled = answers[currentIdx] === null;
-
-  const container = document.getElementById('q-container');
-  container.innerHTML = '';
-
-  const card = document.createElement('div');
-  card.className = 'q-card';
-  card.innerHTML = `
-    <div class="q-number">문항 ${currentIdx + 1} / 26 · ${q.type === 'P' ? '1차 사이코패시' : '2차 사이코패시'} 척도</div>
-    <div class="q-text">${q.text}</div>
-    <div class="options-grid" id="opts"></div>
-  `;
-  container.appendChild(card);
-
-  const opts = document.getElementById('opts');
-  LABELS.forEach(l => {
-    const btn = document.createElement('button');
-    btn.className = 'option-btn' + (answers[currentIdx] === l.val ? ' selected' : '');
-    btn.innerHTML = `<span class="option-score-label">${l.val}점</span>${l.label}`;
-    btn.onclick = () => selectAnswer(l.val);
+function render(){
+  const q=QUESTIONS[currentIdx];
+  const pct=Math.round((currentIdx/26)*100);
+  document.getElementById('progress-label').textContent=`문항 ${currentIdx+1} / 26`;
+  document.getElementById('progress-pct').textContent=pct+'%';
+  document.getElementById('progress-fill').style.width=pct+'%';
+  document.getElementById('btn-prev').style.display=currentIdx>0?'inline-block':'none';
+  const isLast=currentIdx===25;
+  const nb=document.getElementById('btn-next');
+  nb.textContent=isLast?'결과 보기 →':'다음 →';
+  nb.className='btn '+(isLast?'btn-submit':'btn-next');
+  nb.disabled=answers[currentIdx]===null;
+  const c=document.getElementById('q-container');
+  c.innerHTML='';
+  const card=document.createElement('div');
+  card.className='q-card';
+  const tl=q.type==='P'?'1형 사이코패스 (냉담형) 척도':'2형 사이코패스 (충동형) 척도';
+  card.innerHTML=`<div class="q-number">문항 ${currentIdx+1} / 26 · ${tl}</div><div class="q-text">${q.text}</div><div class="options-grid" id="opts"></div>`;
+  c.appendChild(card);
+  const opts=document.getElementById('opts');
+  LABELS.forEach(l=>{
+    const btn=document.createElement('button');
+    btn.className='option-btn'+(answers[currentIdx]===l.val?' selected':'');
+    btn.innerHTML=`<span class="option-score-label">${l.val}점</span>${l.label}`;
+    btn.onclick=()=>selectAnswer(l.val,btn);
     opts.appendChild(btn);
   });
-
-  qStartTime = Date.now();
+  qStartTime=Date.now();
 }
 
-function selectAnswer(val) {
-  const elapsed = (Date.now() - qStartTime) / 1000;
-  responseTimes[currentIdx] = elapsed;
-  answers[currentIdx] = val;
-
-  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
-
-  const isLast = currentIdx === 25;
-  const nextBtn = document.getElementById('btn-next');
-  nextBtn.disabled = false;
-  nextBtn.textContent = isLast ? '결과 보기 →' : '다음 →';
-  nextBtn.className = 'btn ' + (isLast ? 'btn-submit' : 'btn-next');
+function selectAnswer(val,btn){
+  responseTimes[currentIdx]=(Date.now()-qStartTime)/1000;
+  answers[currentIdx]=val;
+  document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const isLast=currentIdx===25;
+  const nb=document.getElementById('btn-next');
+  nb.disabled=false;
+  nb.textContent=isLast?'결과 보기 →':'다음 →';
+  nb.className='btn '+(isLast?'btn-submit':'btn-next');
 }
 
-function nextQ() {
-  if (answers[currentIdx] === null) return;
-  if (currentIdx === 25) {
-    showResult();
-    return;
-  }
-  currentIdx++;
-  render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function nextQ(){
+  if(answers[currentIdx]===null)return;
+  if(currentIdx===25){showResult();return;}
+  currentIdx++;render();window.scrollTo({top:0,behavior:'smooth'});
+}
+function prevQ(){
+  if(currentIdx>0){currentIdx--;render();window.scrollTo({top:0,behavior:'smooth'});}
 }
 
-function prevQ() {
-  if (currentIdx > 0) {
-    currentIdx--;
-    render();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-}
-
-function computeScore() {
-  let primary = 0, secondary = 0;
-  let logLines = [];
-
-  QUESTIONS.forEach((q, i) => {
-    let raw = answers[i] || 1;
-    let score = q.reversed ? (5 - raw) : raw;
-    if (q.type === 'P') primary += score;
-    else secondary += score;
-
-    const t = responseTimes[i] ? responseTimes[i].toFixed(2) : '?';
-    let flag = '';
-    if (responseTimes[i] < 1.2) flag = ' ⚡ 즉각 반응';
-    else if (responseTimes[i] > 8.0) flag = ' 🤔 장시간 고민';
-    logLines.push(`Q${String(i+1).padStart(2,'0')} [${q.type}] · 응답: ${raw}점 · 처리점: ${score}점 · 시간: ${t}s${flag}`);
+function computeScore(){
+  let p=0,s=0,log=[];
+  QUESTIONS.forEach((q,i)=>{
+    const raw=answers[i]||1;
+    const sc=q.rev?(5-raw):raw;
+    if(q.type==='P')p+=sc; else s+=sc;
+    const t=responseTimes[i]?responseTimes[i].toFixed(2):'?';
+    let fl='';
+    if(responseTimes[i]<1.2)fl='  ⚡ 즉각 반응';
+    else if(responseTimes[i]>8)fl='  🤔 장시간 고민';
+    log.push(`Q${String(i+1).padStart(2,'0')} [${q.type==='P'?'냉담형':'충동형'}] · 응답: ${raw}점 · 처리: ${sc}점 · 시간: ${t}초${fl}`);
   });
-
-  return { primary, secondary, total: primary + secondary, logLines };
+  return{primary:p,secondary:s,total:p+s,log};
 }
 
-function showResult() {
-  document.getElementById('quiz-section').style.display = 'none';
-  const rs = document.getElementById('result-section');
-  rs.style.display = 'block';
+function showResult(){
+  document.getElementById('quiz-section').style.display='none';
+  document.getElementById('result-section').style.display='block';
+  const{primary,secondary,total,log}=computeScore();
 
-  const { primary, secondary, total, logLines } = computeScore();
+  const pPct=Math.min(((primary-16)/48)*100,100);
+  const sPct=Math.min(((secondary-10)/30)*100,100);
+  const tPct=Math.min(((total-26)/78)*100,100);
 
-  // Primary: range 16–64
-  const pPct = ((primary - 16) / 48) * 100;
-  // Secondary: range 10–40
-  const sPct = ((secondary - 10) / 30) * 100;
-  // Total: range 26–104
-  const tPct = ((total - 26) / 78) * 100;
+  document.getElementById('p-score-val').textContent=`${primary}점 / 64점`;
+  document.getElementById('s-score-val').textContent=`${secondary}점 / 40점`;
+  document.getElementById('t-score-val').textContent=`${total}점 / 104점`;
+  document.getElementById('p-band').textContent=bandLabel(primary,33.6,'냉담형 (공감·도덕성)');
+  document.getElementById('s-band').textContent=bandLabel(secondary,22.1,'충동형 (자기통제)');
 
-  document.getElementById('p-score-val').textContent = `${primary} / 64`;
-  document.getElementById('s-score-val').textContent = `${secondary} / 40`;
-  document.getElementById('t-score-val').textContent = `${total} / 104`;
+  setTimeout(()=>{
+    document.getElementById('p-bar').style.width=pPct+'%';
+    document.getElementById('s-bar').style.width=sPct+'%';
+    document.getElementById('t-bar').style.width=tPct+'%';
+  },200);
 
-  // Band labels
-  function pBand(v) {
-    if (v >= 48) return '높음 — 조종·공감 결여 특성이 두드러짐';
-    if (v >= 32) return '보통 — 일반 범위 (평균: 33.6점)';
-    return '낮음 — 해당 특성이 적음';
-  }
-  function sBand(v) {
-    if (v >= 30) return '높음 — 충동적·반사회적 경향 두드러짐';
-    if (v >= 20) return '보통 — 일반 범위 (평균: 22.1점)';
-    return '낮음 — 해당 특성이 적음';
-  }
-
-  document.getElementById('p-band').textContent = pBand(primary);
-  document.getElementById('s-band').textContent = sBand(secondary);
-
-  setTimeout(() => {
-    document.getElementById('p-bar').style.width = Math.min(pPct, 100) + '%';
-    document.getElementById('s-bar').style.width = Math.min(sPct, 100) + '%';
-    document.getElementById('t-bar').style.width = Math.min(tPct, 100) + '%';
-  }, 200);
-
-  // Overall grade
-  const gradeEl = document.getElementById('result-grade');
-  const iconEl = document.getElementById('result-icon');
-  const descEl = document.getElementById('result-desc');
-
-  if (total <= 45) {
-    iconEl.textContent = '🌿';
-    gradeEl.textContent = '낮은 성향';
-    gradeEl.className = 'result-grade low';
-    descEl.textContent = '반사회적 특성이 평균보다 낮게 나타났습니다. 공감 능력과 사회적 책임감이 잘 발달되어 있을 가능성이 높습니다. 모든 사람은 스펙트럼 위 어딘가에 위치하며, 낮은 점수가 완벽함을 의미하지는 않습니다.';
-  } else if (total <= 65) {
-    iconEl.textContent = '⚖️';
-    gradeEl.textContent = '일반적 범위';
-    gradeEl.className = 'result-grade mid';
-    descEl.textContent = '일반 성인 평균 범위(약 55점대) 내의 결과입니다. 사람마다 어느 정도의 자기 중심적 사고나 충동적 경향은 자연스럽게 존재합니다. 특정 상황에서 판단이나 공감 능력을 돌아볼 수 있는 계기로 삼으시면 좋겠습니다.';
-  } else {
-    iconEl.textContent = '🔴';
-    gradeEl.textContent = '높은 성향';
-    gradeEl.className = 'result-grade high';
-    descEl.textContent = '반사회적 특성이 평균보다 높게 측정되었습니다. 단, 이 결과는 재미용 자가 테스트 수치이며 임상적 진단이 아닙니다. 인간관계나 감정 조절에 어려움을 느낀다면 전문 심리 상담을 받아보시는 것을 권장합니다.';
+  // 등급 표시
+  const ge=document.getElementById('result-grade'),ie=document.getElementById('result-icon'),de=document.getElementById('result-desc');
+  if(total<=45){
+    ie.textContent='🌿';ge.textContent='낮은 성향 — 평균 이하';ge.className='result-grade low';
+    de.innerHTML=`종합 <strong>${total}점</strong>으로 일반 성인 평균 55.7점보다 <strong>낮습니다.</strong><br/>사이코패스적 특성이 적게 나타났으며, 공감 능력과 사회적 책임감이 잘 발달되어 있을 가능성이 높습니다.`;
+  }else if(total<=65){
+    ie.textContent='⚖️';ge.textContent='보통 수준 — 평균 범위';ge.className='result-grade mid';
+    de.innerHTML=`종합 <strong>${total}점</strong>으로 일반 성인 평균(55.7점)과 <strong>비슷한 수준</strong>입니다.<br/>사이코패스적 특성은 정도 차이가 있을 뿐 모든 사람에게 어느 정도 존재하는 인격 스펙트럼입니다. 이 점수대는 '보통의 사람'에 해당합니다.`;
+  }else{
+    ie.textContent='🔴';ge.textContent='높은 성향 — 평균 이상';ge.className='result-grade high';
+    de.innerHTML=`종합 <strong>${total}점</strong>으로 일반 성인 평균 55.7점보다 <strong>높습니다.</strong><br/>재미용 자가 테스트 결과이며 임상 진단이 아닙니다. 아래 상세 해설을 반드시 읽어보세요.`;
   }
 
-  // Log
-  document.getElementById('log-content').textContent = logLines.join('\n') + `\n\n총점: ${total} · 1차: ${primary} · 2차: ${secondary}`;
+  buildDetail(primary,secondary,total);
 
-  rs.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('log-content').textContent=
+    log.join('\n')+
+    `\n\n▶ 1형(냉담형): ${primary}점 / 64점\n▶ 2형(충동형): ${secondary}점 / 40점\n▶ 종합 점수: ${total}점 / 104점`;
+
+  startCountdown(30);
+  document.getElementById('result-section').scrollIntoView({behavior:'smooth'});
 }
 
-function restart() {
-  answers = new Array(26).fill(null);
-  responseTimes = [];
-  currentIdx = 0;
-  document.getElementById('result-section').style.display = 'none';
-  document.getElementById('quiz-section').style.display = 'block';
-  render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+function bandLabel(v,avg,name){
+  const diff=v-avg;
+  const sign=diff>0?'+':'';
+  if(v>=avg*1.3)return `${v}점 — 높은 수준 (평균 ${avg}점 대비 ${sign}${diff.toFixed(1)}점)`;
+  if(v>=avg*0.7)return `${v}점 — 보통 수준 (평균 ${avg}점 근처)`;
+  return `${v}점 — 낮은 수준 (평균 ${avg}점 대비 ${sign}${diff.toFixed(1)}점)`;
 }
 
-// Init
+function buildDetail(p,s,total){
+  const el=document.getElementById('detail-content');
+
+  // 1형 해설
+  let p1t,p1b;
+  if(p>=48){
+    p1t='1형(냉담형) — 높은 수준';
+    p1b=`<strong>${p}점 / 64점</strong>으로 평균(33.6점)보다 높게 나왔습니다.<br><br>
+    이 척도가 높다는 것은 아래와 같은 성향이 두드러질 수 있음을 의미합니다:<br><br>
+    · <strong>공감의 어려움:</strong> 다른 사람이 슬프거나 힘들어도 내 감정에 큰 영향을 주지 않는 편<br>
+    · <strong>조종적 대인관계:</strong> 원하는 것을 얻기 위해 상대방이 듣고 싶은 말을 의도적으로 하는 경향<br>
+    · <strong>낮은 죄책감:</strong> 내 행동으로 누군가 피해를 입어도 크게 후회하거나 미안함을 느끼지 않는 편<br>
+    · <strong>도덕보다 이익 우선:</strong> 규칙이나 윤리보다 나에게 이득이 되는 것을 먼저 생각<br><br>
+    단, 이 수치가 높다고 해서 범죄자라는 의미가 절대 아닙니다. 다만 인간관계에서 의도치 않게 상대방에게 상처를 줄 수 있으므로, 내 대화 방식과 의사결정을 돌아보는 계기로 삼아보시길 권장합니다.`;
+  }else if(p>=32){
+    p1t='1형(냉담형) — 보통 수준';
+    p1b=`<strong>${p}점 / 64점</strong>으로 일반 성인 평균(33.6점) 범위입니다.<br><br>
+    때로는 자기 이익을 먼저 생각하거나, 타인의 감정을 충분히 고려하지 못하는 순간이 있지만, 이는 매우 보편적인 수준입니다.
+    공감과 자기 중심성 사이에서 균형을 유지하고 있는 상태로 볼 수 있습니다.<br><br>
+    일상에서 상대방의 입장을 의식적으로 헤아리려는 노력이 대인관계 만족도를 높이는 데 도움이 될 수 있습니다.`;
+  }else{
+    p1t='1형(냉담형) — 낮은 수준';
+    p1b=`<strong>${p}점 / 64점</strong>으로 평균(33.6점)보다 낮습니다.<br><br>
+    타인의 감정에 잘 공감하고, 도덕적 판단을 중요하게 여기는 편입니다.
+    다른 사람이 피해를 입으면 죄책감을 느끼고, 상대를 조종하거나 이용하는 것에 거부감을 가지고 있을 가능성이 높습니다.
+    이는 건강한 공감 능력과 사회성을 나타내는 긍정적인 특성입니다.`;
+  }
+
+  // 2형 해설
+  let s1t,s1b;
+  if(s>=30){
+    s1t='2형(충동형) — 높은 수준';
+    s1b=`<strong>${s}점 / 40점</strong>으로 평균(22.1점)보다 높게 나왔습니다.<br><br>
+    이 척도가 높다는 것은 아래와 같은 경향이 있을 수 있음을 의미합니다:<br><br>
+    · <strong>충동 조절 어려움:</strong> 순간의 유혹이나 감정을 참기 힘들고, 나중을 생각하기 전에 먼저 행동하는 편<br>
+    · <strong>계획성 부족:</strong> 앞일을 미리 준비하기보다 즉흥적으로 결정하는 경향<br>
+    · <strong>반복적 문제 패턴:</strong> 같은 실수나 비슷한 곤경에 반복적으로 빠지는 경험<br>
+    · <strong>자극 추구:</strong> 쉽게 지루함을 느끼고 흥미로운 경험을 적극적으로 찾는 편<br><br>
+    충동성은 ADHD, 수면 부족, 만성 스트레스 등 다양한 요인으로도 높아질 수 있으며, 반드시 사이코패스를 의미하지 않습니다.
+    생활 패턴을 점검해보고, 필요하다면 전문 심리 상담을 받아보시길 권장합니다.`;
+  }else if(s>=20){
+    s1t='2형(충동형) — 보통 수준';
+    s1b=`<strong>${s}점 / 40점</strong>으로 일반 성인 평균(22.1점) 범위입니다.<br><br>
+    어느 정도의 충동성이나 즉흥적 행동은 누구에게나 자연스럽게 존재합니다.
+    가끔 계획보다 감정을 따르거나 지루함을 느끼는 것은 인간의 보편적인 모습입니다.<br><br>
+    중요한 결정을 앞두고 잠시 멈추고 결과를 생각하는 습관을 키운다면 더욱 안정적인 생활에 도움이 될 것입니다.`;
+  }else{
+    s1t='2형(충동형) — 낮은 수준';
+    s1b=`<strong>${s}점 / 40점</strong>으로 평균(22.1점)보다 낮습니다.<br><br>
+    계획적이고 신중하게 행동하는 편입니다. 순간의 유혹에 쉽게 흔들리지 않고, 행동 전에 결과를 먼저 생각하는 성향은
+    안정적인 일상을 유지하고 신뢰받는 관계를 형성하는 데 큰 강점입니다.`;
+  }
+
+  // 총평
+  let ot;
+  if(total<=45){
+    ot=`전반적으로 사이코패스적 특성이 <strong>평균보다 낮게</strong> 측정되었습니다.
+    공감 능력, 죄책감, 충동 조절 능력이 모두 비교적 잘 갖춰져 있음을 의미합니다.
+    낮은 점수는 정서적으로 안정적이고 사회적 책임감이 높은 경향과 연관됩니다.`;
+  }else if(total<=65){
+    ot=`전반적으로 <strong>일반 성인의 평균 범위</strong>에 해당하는 결과입니다.
+    사이코패스적 특성은 범죄자만 가진 것이 아닌, 정도 차이가 있을 뿐 누구에게나 존재하는 인격 스펙트럼입니다.
+    이 점수대의 사람들은 상황에 따라 공감과 자기 중심적 사고를 모두 경험하는 '보통의 사람'입니다.`;
+  }else{
+    ot=`평균보다 높은 수치가 나왔습니다. 단, <strong>재미용 자가 테스트 결과임을 반드시 기억해주세요.</strong>
+    임상적 사이코패스 진단은 전문 임상심리사·정신건강의학과 의사가 다수의 면담과 검사를 통해 내리는 것으로,
+    이 테스트만으로 판단할 수 없습니다. 인간관계에서 반복되는 갈등이나 충동 조절에 어려움이 있다면 전문 상담을 권장합니다.`;
+  }
+
+  el.innerHTML=`
+    <div class="detail-block">
+      <div class="detail-block-header"><div class="detail-dot dot-red"></div>
+        <div><div class="detail-block-title">${p1t}</div>
+        <div class="detail-block-subtitle">공감 능력 · 조작성 · 죄책감 측정 (16문항 / 16~64점 / 평균 33.6점)</div></div>
+      </div>
+      <div class="detail-block-body">${p1b}</div>
+    </div>
+    <div class="detail-block">
+      <div class="detail-block-header"><div class="detail-dot dot-orange"></div>
+        <div><div class="detail-block-title">${s1t}</div>
+        <div class="detail-block-subtitle">충동성 · 계획성 · 생활방식 측정 (10문항 / 10~40점 / 평균 22.1점)</div></div>
+      </div>
+      <div class="detail-block-body">${s1b}</div>
+    </div>
+    <div class="detail-block">
+      <div class="detail-block-header"><div class="detail-dot dot-purple"></div>
+        <div><div class="detail-block-title">종합 총평 — ${total}점 / 104점</div>
+        <div class="detail-block-subtitle">전체 LSRP 척도 종합 해석 / 일반 성인 평균 55.7점</div></div>
+      </div>
+      <div class="detail-block-body">${ot}</div>
+    </div>`;
+}
+
+function startCountdown(sec){
+  redirectCancelled=false;
+  let rem=sec;
+  const ne=document.getElementById('countdown-num'),be=document.getElementById('redirect-bar');
+  be.style.transition='none';be.style.width='100%';
+  setTimeout(()=>{be.style.transition=`width ${sec}s linear`;be.style.width='0%';},50);
+  redirectTimer=setInterval(()=>{
+    if(redirectCancelled){clearInterval(redirectTimer);return;}
+    rem--;ne.textContent=rem;
+    if(rem<=0){clearInterval(redirectTimer);window.location.href=BLOG_URL;}
+  },1000);
+}
+
+function goNow(){clearInterval(redirectTimer);window.location.href=BLOG_URL;}
+
+function cancelRedirect(){
+  redirectCancelled=true;clearInterval(redirectTimer);
+  document.getElementById('redirect-box').innerHTML=`
+    <div class="redirect-box-title">📖 블로그 포스팅 보기</div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px;">자동 이동이 취소되었습니다. 아래 버튼으로 블로그에서 더 자세한 내용을 확인하세요.</p>
+    <button class="btn-go" onclick="goNow()">사이코패스 분석 블로그 이동 →</button>`;
+}
+
+function restart(){
+  clearInterval(redirectTimer);
+  answers=new Array(26).fill(null);responseTimes=[];currentIdx=0;
+  document.getElementById('result-section').style.display='none';
+  document.getElementById('quiz-section').style.display='block';
+  render();window.scrollTo({top:0,behavior:'smooth'});
+}
+
 render();
 </script>
-
 </body>
 </html>
