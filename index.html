@@ -256,10 +256,10 @@
       <pre id="log-content"></pre>
     </div>
 
-    <!-- 90초 리다이렉션 -->
+    <!-- 30초 리다이렉션 -->
     <div class="redirect-box" id="redirect-box">
       <div class="redirect-box-title">📖 관련 블로그 포스팅으로 이동</div>
-      <div class="redirect-countdown" id="countdown-num">90</div>
+      <div class="redirect-countdown" id="countdown-num">30</div>
       <div class="redirect-msg">
         초 후 <strong>사이코패스 분석 블로그</strong>로 자동 이동합니다.<br />
         약물 범죄 예방, 사이코패스 심층 분석 글을 확인해 보세요.
@@ -430,7 +430,7 @@ function showResult(){
     log.join('\n')+
     `\n\n▶ 1형(냉담형): ${primary}점 / 64점\n▶ 2형(충동형): ${secondary}점 / 40점\n▶ 종합 점수: ${total}점 / 104점`;
 
-  startCountdown(30);
+  startCountdown(90);
   document.getElementById('result-section').scrollIntoView({behavior:'smooth'});
 }
 
